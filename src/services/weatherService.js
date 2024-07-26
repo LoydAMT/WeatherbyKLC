@@ -1,13 +1,36 @@
 import axios from 'axios';
 
-const BASE_URL = 'https://api.open-meteo.com/v1/forecast';
+const WEATHER_BASE_URL = 'https://api.open-meteo.com/v1/forecast';
+const NOMINATIM_BASE_URL = 'https://nominatim.openstreetmap.org/search';
 
-export const getWeatherData = async (city) => {
+export const getCoordinates = async (city) => {
   try {
-    const response = await axios.get(BASE_URL, {
+    const response = await axios.get(NOMINATIM_BASE_URL, {
       params: {
-        latitude: 10.3157, // Latitude for Cebu
-        longitude: 123.8854, // Longitude for Cebu
+        q: city,
+        format: 'json',
+        limit: 1,
+      },
+    });
+
+    if (response.data.length > 0) {
+      const location = response.data[0];
+      return { latitude: location.lat, longitude: location.lon };
+    } else {
+      throw new Error('No results found');
+    }
+  } catch (error) {
+    console.error('Error fetching coordinates:', error);
+    throw error;
+  }
+};
+
+export const getWeatherData = async (latitude, longitude) => {
+  try {
+    const response = await axios.get(WEATHER_BASE_URL, {
+      params: {
+        latitude,
+        longitude,
         hourly: [
           'temperature_2m',
           'relative_humidity_2m',
@@ -20,14 +43,13 @@ export const getWeatherData = async (city) => {
           'precipitation',
           'visibility'
         ].join(','),
-        timezone: 'Asia/Manila'
-      }
+        timezone: 'auto',
+      },
     });
 
     if (response.data && response.data.hourly) {
       const weatherData = response.data.hourly;
       return {
-        city_name: city,
         temperature: weatherData.temperature_2m[0],
         relative_humidity: weatherData.relative_humidity_2m[0],
         dew_point: weatherData.dew_point_2m[0],
@@ -37,7 +59,7 @@ export const getWeatherData = async (city) => {
         wind_speed: weatherData.wind_speed_10m[0],
         wind_direction: weatherData.wind_direction_10m[0],
         precipitation: weatherData.precipitation[0],
-        visibility: weatherData.visibility[0]
+        visibility: weatherData.visibility[0],
       };
     } else {
       throw new Error('Invalid response from weather API');
@@ -47,6 +69,7 @@ export const getWeatherData = async (city) => {
     throw error;
   }
 };
+
 
 
 /*

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getWeatherData } from './services/weatherService';
+import { getCoordinates, getWeatherData } from './services/weatherService';
 import './App.css'; // Import the CSS file
 
 const App = () => {
@@ -11,9 +11,10 @@ const App = () => {
     const fetchWeather = async () => {
       if (city) {
         try {
-          console.log(`Fetching weather data for city: ${city}`);
-          // Fetch weather data
-          const weatherData = await getWeatherData(city);
+          console.log(`Fetching coordinates for city: ${city}`);
+          const { latitude, longitude } = await getCoordinates(city);
+          console.log(`Coordinates for ${city}: ${latitude}, ${longitude}`);
+          const weatherData = await getWeatherData(latitude, longitude);
           setWeather(weatherData);
         } catch (err) {
           setError(err.message);
@@ -36,6 +37,12 @@ const App = () => {
     }
   };
 
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
   if (error) return <div className="error">Error: {error}</div>;
   if (!weather) return <div className="loading">Loading...</div>;
 
@@ -43,13 +50,14 @@ const App = () => {
     <div className="app">
       <h1>Weather App</h1>
       <div className="search-bar">
-        <input type='text' id="citytofind" placeholder='Enter your city here' />
+        <input type='text' id="citytofind" placeholder='Enter your city here' onKeyDown={handleKeyDown} />
         <button onClick={handleSearch}>Search</button>
       </div>
       
       {weather && (
         <div className="weather-info">
-          <h1>Weather in {weather.city_name}</h1>
+          <h1>Weather in {city}</h1>
+          <p>Location: {weather.temperature} </p>
           <p>Temperature: {weather.temperature} °C</p>
           <p>Relative Humidity: {weather.relative_humidity} %</p>
           <p>Dew Point: {weather.dew_point} °C</p>
@@ -67,9 +75,6 @@ const App = () => {
 };
 
 export default App;
-
-
-
 
 
 /* 
