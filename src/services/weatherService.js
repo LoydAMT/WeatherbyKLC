@@ -60,6 +60,8 @@ export const getWeatherData = async (latitude, longitude) => {
         wind_direction: weatherData.wind_direction_10m[0],
         precipitation: weatherData.precipitation[0],
         visibility: weatherData.visibility[0],
+        latitude,
+        longitude
       };
     } else {
       throw new Error('Invalid response from weather API');
@@ -69,7 +71,6 @@ export const getWeatherData = async (latitude, longitude) => {
     throw error;
   }
 };
-
 
 
 /*

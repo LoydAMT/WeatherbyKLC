@@ -15,7 +15,7 @@ const App = () => {
           const { latitude, longitude } = await getCoordinates(city);
           console.log(`Coordinates for ${city}: ${latitude}, ${longitude}`);
           const weatherData = await getWeatherData(latitude, longitude);
-          setWeather(weatherData);
+          setWeather({ ...weatherData, city });
         } catch (err) {
           setError(err.message);
           console.error('Error fetching data:', err);
@@ -48,7 +48,7 @@ const App = () => {
 
   return (
     <div className="app">
-      <h1>Weather App</h1>
+      <h1 className='Titles'>Weather App</h1>
       <div className="search-bar">
         <input type='text' id="citytofind" placeholder='Enter your city here' onKeyDown={handleKeyDown} />
         <button onClick={handleSearch}>Search</button>
@@ -56,18 +56,26 @@ const App = () => {
       
       {weather && (
         <div className="weather-info">
-          <h1>Weather in {city}</h1>
-          <p>Location: {weather.temperature} </p>
-          <p>Temperature: {weather.temperature} °C</p>
-          <p>Relative Humidity: {weather.relative_humidity} %</p>
-          <p>Dew Point: {weather.dew_point} °C</p>
-          <p>Apparent Temperature: {weather.apparent_temperature} °C</p>
-          <p>Pressure: {weather.surface_pressure} hPa</p>
-          <p>Cloud Cover: {weather.cloud_cover} %</p>
-          <p>Wind Speed: {weather.wind_speed} km/h</p>
-          <p>Wind Direction: {weather.wind_direction} °</p>
-          <p>Precipitation: {weather.precipitation} mm</p>
-          <p>Visibility: {weather.visibility} meters</p>
+          <h1 className='Titles'>Weather Information for {weather.city}</h1>
+          <div className="weather-details">
+            <div className="weather-location">
+              <p><strong>Latitude:</strong> {weather.latitude}</p>
+              <p><strong>Longitude:</strong> {weather.longitude}</p>
+              <p><strong>Temperature:</strong> {weather.temperature} °C</p>
+              <p><strong>Relative Humidity:</strong> {weather.relative_humidity} %</p>
+              <p><strong>Dew Point:</strong> {weather.dew_point} °C</p>
+              <p><strong>Visibility:</strong> {weather.visibility} meters</p>
+            </div>
+            <div className="weather-column">
+              <p><strong>Apparent Temperature:</strong> {weather.apparent_temperature} °C</p>
+              <p><strong>Pressure:</strong> {weather.surface_pressure} hPa</p>
+              <p><strong>Cloud Cover:</strong> {weather.cloud_cover} %</p>
+              <p><strong>Wind Speed:</strong> {weather.wind_speed} km/h</p>
+              <p><strong>Wind Direction:</strong> {weather.wind_direction} °</p>
+              <p><strong>Precipitation:</strong> {weather.precipitation} mm</p>
+              
+            </div>
+          </div>
         </div>
       )}
     </div>
