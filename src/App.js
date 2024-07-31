@@ -2,6 +2,40 @@ import React, { useState, useEffect } from 'react';
 import { getCoordinates, getWeatherData } from './services/weatherService';
 import './App.css'; // Import the CSS file
 
+const weatherCodeToCondition = (code) => {
+  switch (code) {
+    case 0: return 'clear'; // Clear sky
+    case 1:
+    case 2:
+    case 3: return 'cloudy'; // Mainly clear, partly cloudy, and overcast
+    case 45:
+    case 48: return 'fog'; // Fog and depositing rime fog
+    case 51:
+    case 53:
+    case 55: return 'drizzle'; // Drizzle: Light, moderate, and dense intensity
+    case 56:
+    case 57: return 'freezing-drizzle'; // Freezing Drizzle: Light and dense intensity
+    case 61:
+    case 63:
+    case 65: return 'rain'; // Rain: Slight, moderate, and heavy intensity
+    case 66:
+    case 67: return 'freezing-rain'; // Freezing Rain: Light and heavy intensity
+    case 71:
+    case 73:
+    case 75: return 'snow'; // Snow fall: Slight, moderate, and heavy intensity
+    case 77: return 'snow grains'; // Snow grains
+    case 80:
+    case 81:
+    case 82: return 'rain-showers'; // Rain showers: Slight, moderate, and violent
+    case 85:
+    case 86: return 'snow-showers'; // Snow showers slight and heavy
+    case 95: return 'thunderstorm'; // Thunderstorm: Slight or moderate
+    case 96:
+    case 99: return 'thunderstorm-with-hail'; // Thunderstorm with slight and heavy hail
+    default: return '';
+  }
+};
+
 const App = () => {
   const [weather, setWeather] = useState(null);
   const [error, setError] = useState(null);
@@ -11,14 +45,11 @@ const App = () => {
     const fetchWeather = async () => {
       if (city) {
         try {
-          console.log(`Fetching coordinates for city: ${city}`);
           const { latitude, longitude } = await getCoordinates(city);
-          console.log(`Coordinates for ${city}: ${latitude}, ${longitude}`);
           const weatherData = await getWeatherData(latitude, longitude);
           setWeather({ ...weatherData, city });
         } catch (err) {
           setError(err.message);
-          console.error('Error fetching data:', err);
         }
       }
     };
@@ -27,7 +58,7 @@ const App = () => {
   }, [city]);
 
   const handleSearch = () => {
-    const cityInput = document.getElementById('citytofind').value;
+    const cityInput = document.getElementById('citytofind').value.trim();
     if (cityInput) {
       setCity(cityInput);
       setWeather(null); // Reset weather state to show the loading state again
@@ -43,11 +74,32 @@ const App = () => {
     }
   };
 
+  const getWeatherClass = (code) => {
+    const condition = weatherCodeToCondition(code);
+    switch (condition) {
+      case 'rain': return 'raining';
+      case 'snow': return 'snowing';
+      case 'clear': return 'sunny';
+      case 'cloudy': return 'cloudy';
+      case 'fog': return 'fog';
+      case 'drizzle': return 'drizzle';
+      case 'freezing-drizzle': return 'freezing-drizzle';
+      case 'freezing-rain': return 'freezing-rain';
+      case 'rain-showers': return 'rain-showers';
+      case 'snow-showers': return 'snow-showers';
+      case 'thunderstorm': return 'thunderstorm';
+      case 'thunderstorm-with-hail': return 'thunderstorm-with-hail';
+      default: return '';
+    }
+  };
+
+  const weatherClass = weather ? getWeatherClass(weather.weather_code) : '';
+
   if (error) return <div className="error">Error: {error}</div>;
   if (!weather) return <div className="loading">Loading...</div>;
 
   return (
-    <div className="app">
+    <div className={`app ${weatherClass}`}>
       <h1 className='Titles'>Weather App</h1>
       <div className="search-bar">
         <input type='text' id="citytofind" placeholder='Enter your city here' onKeyDown={handleKeyDown} />
@@ -73,16 +125,64 @@ const App = () => {
               <p><strong>Wind Speed:</strong> {weather.wind_speed} km/h</p>
               <p><strong>Wind Direction:</strong> {weather.wind_direction} °</p>
               <p><strong>Precipitation:</strong> {weather.precipitation} mm</p>
-              
             </div>
           </div>
         </div>
       )}
+      <div className={`video-container ${weatherClass}`}>
+        {weatherClass === 'sunny' && (
+          <iframe
+            src="https://www.youtube.com/embed/ZJjYB-hWxMc?autoplay=1&mute=1&loop=1&playlist=ZJjYB-hWxMc"
+            frameBorder="0"
+            allow="autoplay; encrypted-media"
+            allowFullScreen
+            title="Sunny Weather"
+          ></iframe>
+        )}
+        {weatherClass === 'cloudy' && (
+          <iframe
+            src="https://www.youtube.com/embed/rRL_9WxBJBc?autoplay=1&mute=1&loop=1&playlist=rRL_9WxBJBc"
+            frameBorder="0"
+            allow="autoplay; encrypted-media"
+            allowFullScreen
+            title="Cloudy Weather"
+          ></iframe>
+        )}
+        {weatherClass === 'snowing' && (
+          <iframe
+            src="https://www.youtube.com/embed/vz91QpgUjFc?autoplay=1&mute=1&loop=1&playlist=vz91QpgUjFc"
+            frameBorder="0"
+            allow="autoplay; encrypted-media"
+            allowFullScreen
+            title="Snow Weather"
+          ></iframe>
+        )}
+        {weatherClass === 'thunderstorm' && (
+          <iframe
+            src="https://www.youtube.com/embed/gVKEM4K8J8A?autoplay=1&mute=1&loop=1&playlist=gVKEM4K8J8A"
+            frameBorder="0"
+            allow="autoplay; encrypted-media"
+            allowFullScreen
+            title="Thunderstorm Weather"
+          ></iframe>
+        )}
+        {weatherClass === 'raining' && (
+          <iframe
+            src="https://www.youtube.com/embed/3wFvFvVZkwY?autoplay=1&mute=1&loop=1&playlist=3wFvFvVZkwY"
+            frameBorder="0"
+            allow="autoplay; encrypted-media"
+            allowFullScreen
+            title="Rain Weather"
+          ></iframe>
+        )}
+      </div>
     </div>
   );
 };
 
 export default App;
+
+
 
 
 /* 

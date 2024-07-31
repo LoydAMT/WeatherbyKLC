@@ -41,6 +41,7 @@ export const getWeatherData = async (latitude, longitude) => {
           'wind_speed_10m',
           'wind_direction_10m',
           'precipitation',
+          'weather_code',
           'visibility'
         ].join(','),
         timezone: 'auto',
@@ -49,6 +50,9 @@ export const getWeatherData = async (latitude, longitude) => {
 
     if (response.data && response.data.hourly) {
       const weatherData = response.data.hourly;
+      const weatherCode = weatherData.weather_code[0]; // Assume the first hour's weather code
+      const weatherType = getWeatherType(weatherCode, weatherData.temperature_2m[0]);
+
       return {
         temperature: weatherData.temperature_2m[0],
         relative_humidity: weatherData.relative_humidity_2m[0],
@@ -60,6 +64,8 @@ export const getWeatherData = async (latitude, longitude) => {
         wind_direction: weatherData.wind_direction_10m[0],
         precipitation: weatherData.precipitation[0],
         visibility: weatherData.visibility[0],
+        weather_code: weatherCode,
+        weather_type: weatherType,
         latitude,
         longitude
       };
@@ -72,6 +78,47 @@ export const getWeatherData = async (latitude, longitude) => {
   }
 };
 
+// Function to determine weather type based on weather code and temperature
+const getWeatherType = (weatherCode, temperature) => {
+  const weatherCodeMapping = {
+    0: 'Clear sky',
+    1: 'Mainly clear',
+    2: 'Partly cloudy',
+    3: 'Overcast',
+    45: 'Fog',
+    48: 'Depositing rime fog',
+    51: 'Drizzle: Light',
+    53: 'Drizzle: Moderate',
+    55: 'Drizzle: Dense intensity',
+    56: 'Freezing Drizzle: Light',
+    57: 'Freezing Drizzle: Dense intensity',
+    61: 'Rain: Slight',
+    63: 'Rain: Moderate',
+    65: 'Rain: Heavy intensity',
+    66: 'Freezing Rain: Light',
+    67: 'Freezing Rain: Heavy intensity',
+    71: 'Snow fall: Slight',
+    73: 'Snow fall: Moderate',
+    75: 'Snow fall: Heavy intensity',
+    77: 'Snow grains',
+    80: 'Rain showers: Slight',
+    81: 'Rain showers: Moderate',
+    82: 'Rain showers: Violent',
+    85: 'Snow showers slight',
+    86: 'Snow showers heavy',
+    95: 'Thunderstorm: Slight or moderate',
+    96: 'Thunderstorm with slight hail',
+    99: 'Thunderstorm with heavy hail',
+  };
+
+  let weatherType = weatherCodeMapping[weatherCode] || 'Unknown';
+
+  if (weatherType.includes('Snow') && temperature > 0) {
+    weatherType = 'Wet Snow';
+  }
+
+  return weatherType;
+};
 
 /*
 import axios from 'axios';
